@@ -1,0 +1,488 @@
+
+
+\documentclass{article}%
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{fullpage}%
+\setcounter{MaxMatrixCols}{30}
+%TCIDATA{OutputFilter=latex2.dll}
+%TCIDATA{Version=5.50.0.2960}
+%TCIDATA{CSTFile=LaTeX article (bright).cst}
+%TCIDATA{LastRevised=Friday, November 03, 2023 22:36:41}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%BeginMSIPreambleData
+\providecommand{\U}[1]{\protect\rule{.1in}{.1in}}
+\newcommand{\Z}{\mathbb{Z}}
+%EndMSIPreambleData
+\allowdisplaybreaks
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{derivation}[theorem]{Derivation}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\iffalse
+\newenvironment{proof}{\noindent{\em Proof:}}{$\Box$~\\}
+\fi
+\setlength{\tabcolsep}{10pt}
+\renewcommand{\arraystretch}{1.5}
+\begin{document}
+
+\title{ElGamal on Elliptic\\Curve Cryptography}
+\author{Grant McNaughton}
+\date{29 March 2024}
+\maketitle
+
+\section{Introduction}
+
+Cryptography is the practice and study of making communications unintelligible to all except authorized parties. Naturally, we want to ensure the following:
+
+\begin{itemize}
+\item \emph{Correctness}: The message sent by the sender is correctly received
+by the receiver.
+
+\item \emph{Security}: The third party is prevented from eavesdropping the
+message. For this, the sender typically encrypts the message and the receiver
+decrypts. The encryption should be done in a way that the decryption is
+\textbf{extremely difficult} for the the third party.
+
+\item \emph{Efficiency}: Encryption should be efficient for the sender and
+decryption should be efficient for the receiver.
+\end{itemize}
+
+\noindent In this paper, we will describe
+
+\begin{enumerate}
+\item a cryptosystem called \textquotedblleft ElGamal\textquotedblright,
+proposed by Taher ElGamal~\cite{1985_ElGamal}. It is built on an group, say
+$G$.
+
+\item a field called \textquotedblleft Finite prime field\textquotedblright.
+
+\item a group called \textquotedblleft Elliptic Curve Group\textquotedblright.
+It is built on a field, say $F$.
+\end{enumerate}
+
+\section{Cryptosystem (ElGamal)}
+
+\begin{algorithm}
+[ElGamal Scheme]\ 
+
+Consider a situation where Alice (sender) wants to send a message to Bob (receiver).
+
+\begin{enumerate}
+\item Bob does the following once.
+
+\begin{enumerate}
+\item Pick a group $(G,\cdot)$. For some prime number $p$, $G=\{ \mathbb{Z}\setminus 13\mathbb{Z} \}^*=\{1,2,\dots,p-1\}$ and $\cdot$ represents multiplication modulo $p$.
+
+\item Choose $g\in G\setminus \{e\}$
+
+\item Choose $k \in \mathbb{N}$ such that $k>0$.
+
+\item Set $h=g^k=g\cdot g\cdot \ldots \cdot g$.
+
+\item Publish $(G, \cdot)$, $g$, and $h$.
+\end{enumerate}
+
+\item Alice does the following whenever she wants to send a message to Bob.
+
+\begin{enumerate}
+\item Encode her message $m \in G$.
+\item Choose $s \in \mathbb{N}$ such that $s>0$.
+\item Calculate $c_1 = g^s = g\cdot g \cdot \ldots \cdot g$ and $c_2 = h^sm=h\cdot h \cdot \ldots \cdot h \cdot m$.
+\item Send $c_1$ and $c_2$ to Bob.
+\end{enumerate}
+
+\item Bob does the following upon receiving series of $c_{1},c_{2}$ from Alice.
+
+\begin{enumerate}
+\item Calculate $m'=c_1^{-k}c_2=m$.
+\end{enumerate}
+\end{enumerate}
+\end{algorithm}
+
+\begin{example}
+\ 
+
+\begin{enumerate}
+\item Suppose that $G=(\Z/7\Z)^*,$ $g=2,\ k=5,$ $m=3,$ $s=4$. \ Determine the
+values of $h,$ $c_{1},c_{2}$ and $m^{\prime}.$
+
+Note
+
+\begin{itemize}
+\item $h=g^{k}=2^{5}=4$
+
+\item $c_{1}=g^{s}=2^{4}=2$
+
+\item $c_{2}=h^{s}m=4^{4}\cdot3=5$
+
+\item $m^{\prime}=c_{1}^{-k}c_{2}=2^{-5}\cdot5=4^{5}\cdot5=3$
+\end{itemize}
+
+\item Suppose that $G=(\Z/13\Z)^*,$ $g=4,\ k=5,$ $m=6,$ $s=2$. \ Determine the
+values of $h,$ $c_{1},c_{2}$ and $m^{\prime}.$
+
+Note
+
+\begin{itemize}
+\item $h=g^{k}=4^5=10$
+
+\item $c_{1}=g^{s}=4^2=3$
+
+\item $c_{2}=h^{s}m=10^2 \cdot6=2$
+
+\item $m^{\prime}=c_{1}^{-k}c_{2}=3^{-5}\cdot2=9^5\cdot 2 =6$
+\end{itemize}
+\end{enumerate}
+\end{example}
+
+\begin{theorem}
+The ElGamal scheme is correct, that is, $m^{\prime}=m$.
+\end{theorem}
+
+\begin{proof}
+Set $g\in G$ and $k,s\in \mathbb{N}$ with $ k,s >0$. Note that because $\cdot$ represents multiplication modulo p, $\cdot$ is commutative and thus $G$ is an Abelian group. Establish $h=g^k$, $c_1=g^s$, $c_2=h^s m$, and $m'=c_1^{-k}c_2$. From this we can derive that
+\begin{align*}
+    h &= g^k\\
+    h^s &= {g^k}^s\\
+    h^s &= {g^s}^k\\
+    1 = e &= {{g^s}^k}^{-1} h^s \\
+    m = em &= {{g^s}^k}^{-1} h^s m \\
+    m &= c_1^{-k}c_2 = m'
+\end{align*}
+Therefore $m'=m$.
+\end{proof}
+
+\begin{algorithm}
+[$gpow:$ efficient algorithm for power]Let $G$ be a group.
+
+\noindent Input: $\ g\in G,k\in\mathbb{N}$
+
+\noindent Output: $g^{k}$
+
+\begin{enumerate}
+\item If $k=0$ then return $e$.
+
+\item If $k$ is even, then define $r$ given by the output of $gpow(g,\frac{k}{2})$ and return $r\cdot r$.
+\item If $k$ is odd, then define $r$ given by the output of $gpow(g,\frac{k-1}{2})$ and return $r \cdot r \cdot g$.
+\end{enumerate}
+\end{algorithm}
+
+\section{Finite prime field}
+
+\begin{definition}
+[Finite prime field]Let $p$ be a prime number. Then the finite prime field structure
+is given by the following set $F_{p}$ and two operations $+_{p}$ and
+$\times_{p}$ on it.
+
+\begin{enumerate}
+\item $F_{p}=\left\{  0,1,\ldots,p-1\right\}  $
+
+\item Operation $+_{p}: a+_{p}b$, (addition mod $p$)
+
+\item Operation $\times_{p}: a\times_{p}b$, (multiplication mod $p$)
+\end{enumerate}
+\end{definition}
+
+\begin{example}
+\ $p=5$
+
+\begin{enumerate}
+\item $F_5=\left\{0,1,2,3,4\right\}  $
+
+\item $2+_{5} 4= 1$
+
+\item $2\times_{5} 4= 3$
+\end{enumerate}
+\end{example}
+
+\begin{theorem}
+$F_{p}$ is a field where $0$ is the identity for $+_{p}$ and $1$ is the
+identity for $x_{p}$.
+\end{theorem}
+
+\begin{proof}
+See any standard text book.
+% You don't need to write a proof for this one.
+\end{proof}
+
+% Remaining part will be discussed more after Spring break.
+\begin{algorithm}
+[inverse for $\times_{p}$ using the extended Euclidean algorithm]\ 
+
+\noindent Input: $\ a\in F_{p}\backslash\left\{  0\right\}  $
+
+\noindent Output: $a^{-1}$
+
+\begin{enumerate}
+\item $r_0 \leftarrow$ $p$
+\item $r_1 \leftarrow$ $a$
+\item $t_0 \leftarrow$ $0$
+\item $t_1 \leftarrow$ $1$
+\item $r_{i-2}=q_i r_{i-1} + r_i$
+\item $t_{i-2}=q_i t_{i-1} + t_i$
+\item Repeat while $r_i>0$ and stop when $r_i=r_{\textnormal{final}}=0$.
+\item $a^{-1}=t_{\textnormal{final}-1}$
+\end{enumerate}
+\end{algorithm}
+
+\begin{example}
+\ 
+
+\begin{enumerate}
+\item Find $4^{-1}$ in $\mathbb{Z}_{7}$ using the algorithm.
+
+\begin{enumerate}
+\item See the trace of the algorithm:
+
+$%
+\begin{array}
+[c]{r|rrr}%
+i & q_{i} & r_{i} & t_{i}\\\hline
+0 &  & 7 & 0\\
+1 &  & 4 & 1\\
+2 & 1 & 3 & 6\\
+3 & 1 & 1 & 2\\
+4 & 3 & 0 &
+\end{array}
+$
+
+\item Note that $r_{4}=0$. Thus $4^{-1}=t_{3}=2$.
+\end{enumerate}
+
+\item Find $7^{-1}$ in $\mathbb{Z}_{13}$ using the algorithm.
+
+\begin{enumerate}
+\item See the trace of the algorithm:
+
+$%
+\begin{array}
+[c]{r|rrr}%
+i & q_{i} & r_{i} & t_{i}\\\hline
+0 &  & 13 & 0\\
+1 &  & 7 & 1\\
+2 & 1 & 6 & 12\\
+3 & 1 & 1 & 2\\
+4 & 6 & 0 &
+\end{array}
+$
+\item Note that $r_4=0$. Thus $7^{-1}=t_3=2$.
+\end{enumerate}
+\end{enumerate}
+\end{example}
+
+\begin{theorem}
+The algorithm terminates.
+\end{theorem}
+
+\begin{proof}
+Immediate from $r_{0}>r_{1}>\cdots\geq0$.
+\end{proof}
+
+\begin{theorem}
+The algorithm is correct.
+\end{theorem}
+% You don't need to write a proof for this theorem.
+
+
+\section{Group based on Elliptic curve}
+
+\begin{definition}
+[Elliptic Curve Structure]Let $F$ be a field and let $a,b\in F$. The elliptic
+curve structure is given by the following set $E$ and an operation $+$.
+
+\begin{enumerate}
+\item $E_{ab}=\left\{  \left(  x,y\right)  \in F^{2}:y^{2}=x^{3}+ax+b\right\}
+\cup\left\{  \infty\right\}  $
+
+\item Operation \thinspace$+$:\ \ \ \ $\ C=A+B$
+
+$%
+\begin{array}
+[b]{llll}%
+\text{If} & A=\infty & \text{:} & C=B\\
+\text{Else\ if} & B=\infty & \text{:} & C=A\\
+\text{Else\ if} & x_{A}=x_{B}\ \ \text{and }y_{A}=-y_{B} & \text{:} &
+C=\infty\\
+\text{Else\ if} & x_{A}=x_{B}\ \ \text{(and }y_{A}=y_{B}\text{)} & \text{:} & m = \frac{3x_A^2+a}{2y_A}\\
+& & & x_c = m^2-2x_A\\
+& & & y_c = -m(x_C-x_A)-y_A\\
+\text{Else} & \text{(}x_{A}\neq x_{B}\text{,\ generic case)} & \text{:} &
+m = \frac{y_B - y_A}{x_B - x_A}\\
+& & & x_A = m^2-x_A-x_B\\
+& & & y_C = -m(x_C - x_B)-y_A\\
+\end{array}
+$
+\end{enumerate}
+\end{definition}
+
+\begin{example}
+\ 
+
+\begin{enumerate}
+\item Let $F=(F_{3},+_{3},\times_{3})$ and $a=1$ and $b=1$. (see below for the
+definition of the field.)
+
+\begin{enumerate}
+\item Find all the elements of the elliptic curve $E$.
+\begin{align*}
+E  &  =\left\{  \left(  x,y\right)  \in F_{3}^{2}:y^{2}=x^{3}+x+1\right\}
+\cup\left\{  \infty\right\} \\
+&  =\left\{  (0,1),(0,2),(1,0),\infty\right\}
+\end{align*}
+
+
+\item Construct the operation table.
+\[
+\begin{array}
+[c]{c|cccc}%
+oA & (0,1) & (0,2) & (1,0) & \infty\\
+\hline
+(0,1) & (1,0) & \infty & (0,2) & (0,1)\\
+(0,2) & \infty & (1,0) & (0,1) & (0,2)\\
+(1,0) & (0,2) & (0,1) & \infty & (1,0)\\
+\infty & (0,1) & (0,2) & (1,0) & \infty
+\end{array}
+\]
+
+\end{enumerate}
+
+\item Let $F=\left(  F_{5},+_{5},\times_{5}\right)  $ and $a=0$ and $b=1$.
+
+\begin{enumerate}
+
+\item Find all the elements of the elliptic curve $E$.
+\begin{align*}
+E  &  =\left\{  \left(  x,y\right)  \in F_{5}^{2}:y^{2}=x^{3}+1\right\}
+\cup\left\{  \infty\right\} \\
+&  =\left\{  (0,1),(0,4),(2,2),(2,3),(4,0),\infty\right\}
+\end{align*}
+
+\item Construct the operation table.
+\[
+\begin{array}
+[c]{c|cccccc}%
+oA & (0,1) & (0,4) & (2,3) & (2,3) & (4,0) & \infty\\
+\hline
+(0,1) & (0,4) & \infty & (2,3) & (4,0) & (2,2) & (0,1)\\
+(0,4) & \infty & (0,1) & (4,0) & (2,2) & (2,3) & (0,4)\\
+(2,2) & (2,3) & (4,0) & (0,4) & \infty & (0,1) & (2,2)\\
+(2,3) & (4,0) & (2,2) & \infty & (0,1) & (0,4) & (2,3)\\
+(4,0) & (2,2) & (2,3) & (0,1) & (0,4), & \infty & (4,0)\\
+\infty & (0,1) & (0,4) & (2,2) & (2,3) & (4,0) & \infty
+\end{array}
+\]
+\end{enumerate}
+\end{enumerate}
+\end{example}
+
+\begin{derivation}
+\ 
+
+\begin{itemize}
+\item We will derive the formulas for $m,x_{C}$ and $y_{C}$ for the generic
+case.
+
+\begin{enumerate}
+\item Determine $x_{C^{\prime}}$ and $y_{C^{\prime}}$.
+
+\begin{enumerate}
+\item For this, we need to solve%
+\begin{align*}
+y  &  =y_{A}+m\left(  x-x_{A}\right) \\
+y^{2}  &  =x^{3}+ax+b
+\end{align*}
+where%
+\[
+m=\frac{y_{B}-y_{A}}{x_{B}-x_{A}}%
+\]
+
+\item Because $y=m(x-x_A)+y_a$, we know that $y^2=(m(x-x_A)+y_a)^2$, which can be simplified as follows:
+
+\begin{align*}
+    y^2&=(m(x-x_A)+y_a)^2\\
+    &=(m(x-x_A))^2+2m(x-x_A)y_A+y_A^2\\
+    &=(mx-mx_A)^2+2mxy_A-2mx_Ay_A+y_A^2\\
+    &=m^2x^2-2m^2xx_A+m^2x_A^2+2mxy_A-2mx_Ay_A+y_A^2\\
+    &=m^2x^2+(-2m^2x_A+2my_A)x+(m^2x_A^2-2mx_Ay_A+y_A^2)\\
+    &=m^2x^2+2m(y_A-mx_A)x+(mx_A-y_A)^2
+\end{align*}
+
+This result can then be used as the left-hand side of $y^2=x^3+ax+b$ as follows:
+
+\begin{align*}
+    m^2x^2+2m(y_A-mx_A)x+(mx_A-y_A)^2&=x^3+ax+b\\
+    0 &= x^3-m^2x^2+(a-2m(y_A-mx_A))x+(b-(mx_A-y_A)^2)
+\end{align*}
+
+Using Vieta's formulas, we can say that $x_A+x_B+x_{C'}=-\frac{-m^2}{1}$ and thus $x_{C'}=m^2-x_A-x_B$.
+
+By definition, $y_{C'}=m(x_C-x_A)+y_A$.
+
+% hint: use the sum of roots of a cubic equation (resource on Moodle)
+\end{enumerate}
+
+\item Determine $x_{C}$ and $y_{C}$.
+
+$x_C=x_{C'}=m^2-x_A-x_B$
+
+$y_C=-y_{C'}=-(m(x_C-x_A)+y_A)=-m(x_C-x_A)-y_A$.
+\end{enumerate}
+
+\item Derive the formula for the slope $m$ when $x_{A}=x_{B}$ and
+$y_{A}=y_{B}$.
+
+\begin{enumerate}
+\item We can use implicit differentiation to find the derivative $\frac{dy}{dx}$:
+\begin{align*}
+    y^2&=x^3+ax+b\\
+    2y\frac{dy}{dx} &= 3x^2+a\\
+    \frac{dy}{dx} &= \frac{3x^2+a}{2y}
+\end{align*}
+
+\item We can then evaluate the derivative at point $A$ to find $m=\frac{2x_A^2+a}{2y_a}$.
+
+\end{enumerate}
+\end{itemize}
+\end{derivation}
+
+\begin{theorem}
+$\left(  E,+\right)  $ is is a group where $\infty$ is identity and the
+inverse of $A$ is $\infty$ if $A=\infty$ and $\left(  x_{A},-y_{A}\right)  $
+if $A=\left(  x_{A},y_{A}\right)  $.
+\end{theorem}
+% You don't need to write a proof for this theorem.
+%-----------------------------------------------------------
+%Referenes
+%-----------------------------------------------------------
+\begin{thebibliography}{}
+\bibitem[1]{1985_ElGamal}
+Taher ElGamal
+\newblock A Public-Key Cryptosystem and a Signature Scheme Based on Discrete Logarithms
+\newblock {\em IEEE Transactions on Information Theory}, 31(4), 1985.
+\end{thebibliography}
+
+\end{document}

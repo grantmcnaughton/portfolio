@@ -1,0 +1,236 @@
+%======================
+% PCA
+%======================
+
+\documentclass{article}%
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{fullpage}%
+\setcounter{MaxMatrixCols}{30}
+%TCIDATA{OutputFilter=latex2.dll}
+%TCIDATA{Version=5.50.0.2960}
+%TCIDATA{CSTFile=LaTeX article (bright).cst}
+%TCIDATA{LastRevised=Sunday, October 29, 2023 09:45:08}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%BeginMSIPreambleData
+\providecommand{\U}[1]{\protect\rule{.1in}{.1in}}
+%EndMSIPreambleData
+\allowdisplaybreaks
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\iffalse
+\newenvironment{proof}{\noindent{\em Proof:}}{$\Box$~\\}
+\fi
+\setlength{\tabcolsep}{10pt}
+\renewcommand{\arraystretch}{1.5}
+\begin{document}
+
+\title{Principal Component Analysis}
+\author{Grant McNaughton}
+\date{23 February 2024}
+\maketitle
+
+\section{Problem}
+
+Informally put, the problem is to find a \textquotedblleft
+natural\textquotedblright\ coordinate system for a given collection of points.
+The following makes it precise.
+
+\begin{problem}
+\ %
+
+\begin{tabular}
+[c]{lll}%
+\text{In:} & $X=\left[
+\begin{array}
+[c]{c}%
+x_{1}\\
+\vdots\\
+x_{m}%
+\end{array}
+\right]  \in\mathbb{R}^{m\times d}$ & where $x_{i}\ $is a point in the $d$-dim
+space\\
+\text{Out:} & $c=\left[  c_{1}\cdots c_{d}\right]  \in\mathbb{R}^{d}\ \,$ &
+where $c_{j}\ $is the mean of the $j$-th coordinate of the $m\ $points\\
+& $B=\left[  b_{1}\cdots b_{d}\right]  \in\mathbb{R}^{d\times d}$ & where
+$b_{k}=\arg\max\limits_{\substack{u\in\mathbb{R}^{d}\\\left\vert \left\vert
+u\right\vert \right\vert =1\\b_{1}\cdot u=\cdots=b_{k-1}\cdot u=0}%
+}\sum\limits_{1\leq i\leq m}\left(  x_{ci}\cdot u\right)  ^{2}\ \,$\\
+&  & where again $\left[
+\begin{array}
+[c]{c}%
+x_{c1}\\
+\vdots\\
+x_{cm}%
+\end{array}
+\right]  =\left[
+\begin{array}
+[c]{c}%
+x_{1}-c\\
+\vdots\\
+x_{m}-c
+\end{array}
+\right]  $%
+\end{tabular}
+
+\end{problem}
+
+\begin{remark}
+\ 
+
+\begin{enumerate}
+\item $c$ is the center of the \textquotedblleft natural\textquotedblright%
+\ coordinate system.
+
+\item $B$ is the orthonormal basis defining the \textquotedblleft
+natural\textquotedblright\ coordinate system.
+\end{enumerate}
+\end{remark}
+
+\section{Theory}
+
+\begin{notation}
+Let $Xc=\left[
+\begin{array}
+[c]{c}%
+x_{c1}\\
+\vdots\\
+x_{cm}%
+\end{array}
+\right]  $.
+\end{notation}
+
+\begin{theorem}
+Let $S=X_{c}^{t}X_{c}\in\mathbb{R}^{d\times d}$. Let $V=\left[  v_{1}\cdots
+v_{d}\right]  ,$ $\Lambda=\left[
+\begin{array}
+[c]{ccc}%
+\lambda_{1} &  & \\
+& \ddots & \\
+&  & \lambda_{d}%
+\end{array}
+\right]  =ED\left(  S\right)  $. Assume that $\lambda_{1}\geq\cdots\geq
+\lambda_{d}$ and that $\left\vert \left\vert v_{1}\right\vert \right\vert
+=\cdots=\left\vert \left\vert v_{d}\right\vert \right\vert =1$. Then $B=V.$
+\end{theorem}
+
+\begin{proof}
+We will prove by induction that $B=V$. First, we will prove that $B_1, B_2 = v_1, v_2$.
+
+Consider the following set of equations: 
+\begin{align*}
+    \sum_{i=1}^m(x_{ci}\cdot u)^2&=||X_cu||\\
+    &=(X_cu)^\intercal(X_cu)\\
+    &=u^\intercal X_c^\intercal X_c u\\
+    &=u^\intercal S u
+\end{align*}
+
+Because $V$ is orthonormal, $u$ can be expressed as $a_1v_1+\dots+a_dv_d$ for some set of constants $a_1,\dots,a_d$. We can continue our computation as follows:
+\begin{align*}
+    \sum_{i=1}^m(x_{ci}\cdot u)^2 &= u^\intercal S u\\
+    &= u^\intercal S (a_1v_1+\dots+a_dv_d)\\
+    &= u^\intercal(a_1\lambda_1v_1+\dots+a_d\lambda_dv_d)\\
+    &= (a_1v_1^\intercal+\dots+a_dv_d^\intercal)(a_1\lambda_1v_1+\dots+a_d\lambda_dv_d)
+\end{align*}
+Because all vectors $v_i$ are orthogonal, $v_i^\intercal v_i=1$ and $v_i^\intercal v_j=0$ for all $i,j\in[1,n],i\neq j$. Therefore,
+\begin{align*}
+    \sum_{i=1}^m(x_{ci}\cdot u)^2 &=(a_1v_1^\intercal+\dots+a_dv_d^\intercal)(a_1\lambda_1v_1+\dots+a_d\lambda_dv_d)\\
+    &= a_1^2\lambda_1+\dots+a_i^2\lambda_i
+\end{align*}
+From this, we can rewrite our problem as
+\[
+\underset{||u=1||}{\textnormal{argmax}}(\sum_{i=1}^m(x_{ci}\cdot u)^2)
+=\underset{\sum_{i=1}^d a_i^2 =1}{\textnormal{argmax}}(a_1^2\lambda_1+\dots+a_d^2\lambda_d)
+\]
+Without loss of generality, assume the eigendecomposition of $S$ is sorted such that $\lambda_1 \leq \lambda_2 \leq \dots \leq \lambda_d$. When this is the case, $a_1=1, a_n=0$ for all $n\in[2,d]$ and $a_1^2\lambda_1+\dots+a_d^2\lambda_d=\lambda_1$. Thus $b_1=\underset{||u=1||}{\textnormal{argmax}}(x_{ci}\cdot u)^2=u=v_1$.
+\\~\\~\\
+Assume the induction hypothesis $b_n=v_n$. \\Then $b_{n+1}$ is given by $\underset{\substack{||u=1||\\b_1 \cdot u=\dots=b_{n}\cdot u=0}}{\textnormal{argmax}}(x_{ci}\cdot u)^2=\underset{\substack{\sum_{i=1}^d a_i^2 =1\\b_1\cdot a=\dots=b_n\cdot a =0}}{\textnormal{argmax}}(a_1^2\lambda_1+\dots+a_d^2\lambda_d)$.
+
+Because setting $a_x$ as any nonzero value for any $x\in[1,n]$will make $b_x\cdot a =0a_1+\dots+0a_{x-1}+1a_x+0a_{x+1}+\dots+0a_d=a_x\neq 0$, we know that $a_x=0$ and our new problem can be expressed as $\underset{\substack{\sum_{i=1}^d a_i^2 =1\\b_1\cdot a=\dots=b_n \cdot a=0}}{\textnormal{argmax}}(a_{n+1}^2\lambda_{n+1}+\dots+a_d^2\lambda_d)$.
+
+ Once again, this is maximized when $a_{n+1}=1,a_x=0$ for all $x\in[n+2,d]$ and $a_{n+1}^2\lambda_{n+1}+\dots+a_d^2\lambda_d=\lambda_{n+1}$. Thus $b_{n+1}=\underset{\substack{||u=1||\\b_1 \cdot u=\dots=b_n \cdot u=0}}{\textnormal{argmax}}(x_{ci}\cdot u)^2=v_{n+1}$.
+\\~\\~\\
+By the principle of mathematical induction, we can say that $b_n=v_n$ for all $n\in[1,d]$.
+\end{proof}
+\pagebreak
+\begin{corollary}
+Let $U,\Sigma,V=SVD\left(  X_{c}\right)  $. Then $B=V.$
+\end{corollary}
+
+\begin{proof}
+Immediate from the fact that the normalized eigenvector matrix of
+$S=X_{c}^{t}X_{c}$ is the same as the right singular vector matrix of $X_{c}$.
+\end{proof}
+
+\begin{algorithm}
+$c,V\leftarrow PCA\left(  X\right)  $
+
+\begin{enumerate}
+\item $c\leftarrow$ column mean of $X$
+
+\item $X_{c}\leftarrow\left[
+\begin{array}
+[c]{c}%
+x_{1}-c\\
+\vdots\\
+x_{m}-c
+\end{array}
+\right]  $
+
+\item $U,\Sigma,V\leftarrow SVD\left(  X_{c}\right)  $
+
+\item return $c,V$.\ 
+\end{enumerate}
+\end{algorithm}
+
+\begin{theorem}
+Let $X^{\prime}=\left[
+\begin{array}
+[c]{c}%
+x_{1}^{\prime}\\
+\vdots\\
+x_{d}^{\prime}%
+\end{array}
+\right]  \in\mathbb{R}^{m\times d}\ $be such that $x_{i}-c=x_{i1}^{\prime
+}v_{1}^{t}+\cdots+x_{id}^{\prime}v_{d}^{t}$. Then $X^{\prime}=X_{c}V$.
+\end{theorem}
+
+\begin{proof}
+Note that because $V$ is an orthogonal matrix, $V^\intercal=V^{-1}$ and $v_i v^\intercal_i=1, v_i v^\intercal_j=0$ for all $i,j\in \mathbb{N},i\neq j$. Additionally, we have already defined $X_c=X-c$, so we can say that $x_i-c={x_c}_i=x'_{i1}v^\intercal_1+\cdots+x'_{id}v^\intercal_d$.
+
+${x_c}_i \in \mathbb{R}^{1\times d}$ and $V \in \mathbb{R}^{d \times d}$, so ${x_c}_i V =(x'_{i1}v^\intercal_1+\cdots+x'_{id}v^\intercal_d)V \in \mathbb{R}^{1\times d}$. From this, we can show the following:
+\begin{align*}
+    {x_c}_i V &= (x'_{i1}v^\intercal_1+\cdots+x'_{id}v^\intercal_d)V\\
+    &= x'_{i1}v^\intercal_1v_1+x'_{i1}v^\intercal_1v_2+\cdots+x'_{i1}v^\intercal_1v_d+x'_{i2}v^\intercal_2v_1+\cdots+x'_{id}v^\intercal_dv_1+\cdots+x'_{id}v^\intercal_dv_d\\
+    &=x'_{i1}+x'_{i2}+\cdots+x'_{id}\\
+    &=x'_i
+\end{align*}
+We can then generalize ${x_c}_iV=x'_i$ to say that $X_c V = X'$.
+\end{proof}
+
+
+\end{document}

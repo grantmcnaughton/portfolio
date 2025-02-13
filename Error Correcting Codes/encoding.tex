@@ -1,0 +1,243 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{fullpage}
+\allowdisplaybreaks
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{derivation}[theorem]{Derivation}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\iffalse
+\newenvironment{proof}{\noindent{\em Proof:}}{$\Box$~\\}
+\fi
+\setlength{\tabcolsep}{10pt}
+\renewcommand{\arraystretch}{1.5}
+\begin{document}
+
+\title{Error Correcting Codes \\(Reed-Solomon encoding and Berlekamp-Welch decoding)}
+\author{Grant McNaughton}
+\date{13 April 2024}
+\maketitle
+
+\section{Introduction}
+
+Error correcting codes strengthen our ability to send and receive messages between two
+parties in the presence of errors caused by noise. They are typically used as follows: The sender encodes a message into  a code and the receiver decodes
+the received code (with errors) by correcting the errors. Naturally, we want to
+ensure the following:
+
+\begin{itemize}
+\item \emph{Correctness}: The message sent by the sender is correctly received
+by the receiver (almost always).
+
+\item \emph{Efficiency}: Encoding should be efficient for the sender and
+decoding should be efficient for the receiver.
+\end{itemize}
+
+\noindent Usually, this is done by
+
+\begin{itemize}
+\item \textquotedblleft encoding\textquotedblright\ the messages sufficiently
+different from each other
+
+\item \textquotedblleft decoding\textquotedblright\ the encoded messages with
+errors by finding \textquotedblleft nearby\textquotedblright\ message.
+\end{itemize}
+
+\noindent In this paper, we describe
+
+\begin{enumerate}
+\item encoding schemed from Reed and Solomon.
+
+\item decoding scheme from Berlekamp and Welch.
+\end{enumerate}
+
+\section{Encoding (Reed-Solomon)}
+
+Reed-Solomon encoding was first introduced by Irving Reed and Gustave Solomon in 1960. It is commonly used in CDs, DVDs, Blu-Ray Discs, and QR codes, among many other things, to prevent data loss when transmitting by adding extra dimensionality that can be used to ensure correctness.
+
+The Reed-Solomon encoding algorithm converts from input to output as follows:
+\begin{itemize}
+    \item \textit{Input}: Some message $m=(m_0,m_1,\dots,m_{k-1})\in F_q^k$
+    \item \textit{Output}: Some encoded message $c=(c_0,c_1,\dots,c_{n-1})\in F_q^n$
+\end{itemize}
+where $n>k$. It does this using the process described below.
+
+\begin{algorithm}[Reed-Solomon Encoding]\
+
+\begin{enumerate}
+    \item Fix $a=(a_0,a_1,\dots,a_{n-1})\in F_q^n$ where for all $i\neq j$, $a_i \neq a_j$.
+    \item Create a function $f:\mathbb{R}\rightarrow \mathbb{R}$ where $f(x)=m_0+m_1 x + m_2x^2 + \dots + m_{k-1}x^{k-1}$.
+    \item Set $c_i=f(a_i)$ for $i=0,1,\dots,n-1$.
+\end{enumerate}
+\end{algorithm}
+
+\begin{example}\
+
+Suppose we want to encode the message $m=(3,5,4)$ in $F_{13}$ using $a=(1,2,3,4,5,6)$. In this case, $q=13, k=3,$ and $n=6$.
+\begin{enumerate}
+\item $f(x)=m_0+m_1 x + m_2x^2=3+5x+4x^2$
+\item $c_0=3+5+4=12$
+
+$c_1=3+5\cdot 2 + 4\cdot 2^2=3+10+16=29=3$
+
+$c_2=3+5\cdot3+4\cdot3^2=3+15+36=54=2$
+
+$c_3=3+5\cdot4+4\cdot4^2=3+20+64=87=9$
+
+$c_4=3+5\cdot5+4\cdot5^2=3+25+100=128=11$
+
+$c_5=3+5\cdot6+4\cdot6^2=3+30+144=177=8$
+\item $c=(12,3,2,9,11,8)$
+\end{enumerate}
+\end{example}
+
+\begin{theorem}
+    The minimum Hamming distance between any two encoded messages $m$ and $m'$, $d_\text{min}=d(\Phi(m),\Phi(m'))=n-(k-1)$ where $\Phi$ is the Reed-Solomon encoding and $d$ is the Hamming distance.
+\end{theorem}
+
+\begin{proof}
+    We will prove this first by showing that for any two messages $m\neq m'$, it holds that $d(\Phi(m),\Phi(m'))\geq n-(k-1)$. We will then prove that there exists some $m\neq m'$ such that $d(\Phi(m),\Phi(m'))=n-(k-1)$ to complete our proof. 
+    \begin{enumerate}
+        \item Let $m\neq m'\in F_q^k$ and define $c=\Phi(m)$ and $c'=\Phi(m')$. In this case, $d(\Phi(m),\Phi(m'))$ is equal to the number of nonzero entries in $c-c'$.
+        
+        Establish $g(x)=f(x)-f'(x)=(m_0+m_1 x + m_2x^2 + \dots + m_{k-1}x^{k-1})-(m'_0+m'_1 x + m'_2x^2 + \dots + m'_{k-1}x^{k-1})=(m_0-m'_0)+(m_1-m'_1)x+\dots +(m_{k-1}-m'_{k-1})x^{k-1}$. Note that if for all $i$, $m_i\neq m'_i$, then $g$ is of degree $k-1$. If there exists some $i$ such that $m_i=m'_i$, then $g$ is of degree less than $k-1$. Thus $\text{deg}(g)\leq k-1$. By the Fundamental Theorem of Algebra, $g$ has at most $k-1$ roots.
+
+        $c-c'=(f(a_0)-f'(a_0),f(a_1)-f'(a_1),\dots,f(a_{n-1},f'(a_{n-1}))=((g(a_o),g(a_1),\dots,g(a_{n-1}))$. $c-c'$ has $n$ entries and thus the number of nonzero entries in $c-c'$ is equal to $n$ minus the number of zero entries in $((g(a_o),g(a_1),\dots,g(a_{n-1}))$.
+
+        Because for all $i,j$, $a_i\neq a_j$, there are at most $k-1$ zero entries in $((g(a_o),g(a_1),\dots,g(a_{n-1}))$, as there are at most $k-1$ roots of $g$. We will denote this as $g_\text{zero entries}$. From this,
+        \begin{align*}
+            g_\text{zero entries}&\leq k-1\\
+            -g_\text{zero entries}&\geq -(k-1)\\
+            d(\Phi(m),\Phi(m'))=d(c,c')=n-g_\text{zero entries}&\geq n-(k-1)
+        \end{align*}
+        Thus $d(\Phi(m),\Phi(m'))\geq n-(k-1)$.
+
+        \item We now want to find a combination of messages $m$ and $m'$ such that the number of zero entries in $c-c'$ is exactly $k-1$. Thus the $g$ generated by $m$ and $m'$ will have exactly $k-1$ roots and we can write $g$ in the form $g(x)=(x-a_0)(x-a_1)\dots(x-a_{k-2})$. 
+        
+        Let $m'=(0,0,\dots ,0)$. Then $f'(x)=0$ and $c'=(0,0,\dots,0)$. Because $g=f-f'$ and $f'(x)=0$, we can say that $g(x)=f(x)$ and $m$ is defined as the coefficients of $g=f$. Thus $m=(m_0,m_1,\dots,m_{k-2},1)\neq(0,0,\dots,0)=m'$. Thus there exists some $m\neq m'$ where $d(\Phi(m),\Phi(m'))=n-(k-1)$
+        \end{enumerate}
+        Because $d_\text{min}\geq n-(k-1)$ and there exists some $d=n-(k-1)$, we can say that $d_\text{min}=n-(k-1)$.
+\end{proof}
+
+\begin{theorem}
+    If $n\geq2\epsilon+k$ where $\epsilon$ is a rough maximum for the number of transmission errors, then $d_\text{min}$ is sufficiently large.
+\end{theorem}
+
+\begin{proof}
+    Assume that we establish $d_\text{min}>2\epsilon$ where $\epsilon$ is a hyperparameter defining the amount of corruption expected during transmission. We have previously determined that $d_\text{min}=n-(k-1)$. From this, we can say that
+    \begin{align*}
+        d_\text{min} = n-(k-1) &> 2\epsilon\\
+        n &> 2\epsilon+k-1
+    \end{align*}
+    Thus any $n\geq 2\epsilon+k$ is "sufficiently large" enough for our $d_\text{min}$.
+    
+\end{proof}
+
+\section{Decoding (Berlekamp-Welch)}
+
+The Berlekamp-Welch algorithm was developed by Elwyn Berlekamn and Lloyd Welch in 1986 as an efficient method to decode Reed-Solomon encoding. The Berlekamp-Welch algorithm converts from input to output as follows:
+\begin{itemize}
+    \item \textit{Input}: Some (possibly corrupted) encoded message $b\in F_q^n$
+    \item \textit{Output}: Some decoded message $m^*\in F_q^k$ such that $d(\Phi(m^*),b)\leq \epsilon$, if such an $m^*$ exists
+\end{itemize}
+This algorithm will ideally yield $m^*=m$ or an error if the message is too corrupted, but there is a small possibility that a specific combination of corrupting errors may return $m^*\neq m$. The likelihood of this happening is very low, as the error would have to force $m^*$ to look like a completely different valid message in $\mathbb{R}^n$ space.
+
+This algorithm requires us to establish two polynomials $E$ and $G$. $E$ is our error-locating polynomial and must be such that $E(a_i)=0$ if and only if $b_i\neq c_i=f(a_i)$ and that $E(x)=\Pi_{j\text{ s.t. }b_j\neq c_j}(x-a_i)x^{\epsilon-d(c,b)}$. We will then define $G(x)=f(x)E(x)$.
+
+$E$ and $G$ thus satisfy the following:
+\begin{enumerate}
+    \item E is monic
+    \item $\text{deg}(E)=d(b,c)+(\epsilon-d(c,b))=\epsilon$
+    \item $\text{deg}(G)=\text{deg}(f)+\text{deg}(E)=k-1+\epsilon$
+    \item For $)\leq i\leq n-1$, $b_iE(a_i)=G(a_i)$. This is shown by the following cases:
+    \begin{enumerate}
+        \item $c_i\neq b_i$: 
+
+        $b_iE(a_i)=b_i\cdot0=0$
+
+        $G(a_i)=f(a_i)E(a_i)=f(a_i)\cdot0=0$
+
+        Thus $b_iE(a_i)=0=G(a_i)$.
+        \item $c_i=b_i$:
+
+        $G(a_i)=f(a_i)E(a_i)=c_iE(a_i)=b_iE(a_i)$
+    \end{enumerate}
+\end{enumerate}
+
+\begin{theorem}
+    If $E,G$ and $E',G'$ are two different sets of polynomials that both satisfy the properties above, then $\frac{E}{G}=\frac{E'}{G'}$.
+\end{theorem}
+
+\begin{proof}
+    It suffices to show that $GE'-G'E=0$, which can then be easily manipulated to show that $\frac{E}{G}=\frac{E'}{G'}$.
+
+    Let $R(a_i)=G(a_i)E'(a_i)-G'(a_i)E(a_i)$. Thus $\text{deg}(R)\leq \text{max}(\text{deg}(GE'),\text{deg}(G'E))$. As defined above, $\text{deg}(E)=\text{deg}(E')=\epsilon$ and $\text{deg}(G)=\text{deg}(G')=k-1+\epsilon$. From this, we can say that $\text{deg}(GE')=\text{deg}(G'E)=\text{deg}(G)+\text{deg}(E)=k-1+2\epsilon$.
+
+    Because $\text{deg}(R)=\text{max}(\text{deg}(GE'),\text{deg}(G'E))=\text{max}(k-1+2\epsilon,k-1+2\epsilon)=k+2\epsilon-1=n-1$, we know that $R$ can have at most $n-1$ roots without being the trivial polynomial $R(a_i)=0$. However, $R$ must have $n$ solutions, so $R=GE'-G'E=0$.
+\end{proof}
+
+We will now describe the algorithm used for Berlekamp-Welch decoding from our polynomials $E$ and $G$ as well as our corrupted message $b$. Note the following:
+\begin{itemize}
+    \item $E(x)=s_0+s_1x+s_2x^2+\dots+s_{\epsilon-1}x^{\epsilon-1}+1x^\epsilon$
+    \item $G(x)=t_0+t_1x+t_2x^2+\dots+t_{k-1+\epsilon}x^{k-1+\epsilon}$
+    \item $b_iE(a_i)=G(a_i)$
+\end{itemize}
+We can then expand this into a system of equations:
+\begin{align*}
+    b_0(s_0+s_1a_0+\dots+s_{\epsilon-1}a_0^{\epsilon-1}+a_0^\epsilon) &= t_0+t_1a_0+\dots+t_{k-1+\epsilon}a_0^{k-1+\epsilon}\\ \vdots \\
+    b_{n-1}(s_0+s_1a_{n-1}+\dots+s_{\epsilon-1}a_{n-1}^{\epsilon-1}+a_{n-1}^\epsilon) &= t_0+t_1a_{n-1}+\dots+t_{k-1+\epsilon}a_{n-1}^{k-1+\epsilon}
+\end{align*}
+Rearranging to isolate our known term $b_na_n^\epsilon$, we have
+\begin{align*}
+    b_0s_0+b_0s_1a_0+\dots+b_0s_{\epsilon-1}a_0^{\epsilon-1}&-t_0-t_1a_0-\dots-t_{k-1+\epsilon}a_0^{k-1+\epsilon}=-b_0a_0^\epsilon\\
+    \vdots \\
+    b_{n-1}s_0+b_{n-1}s_1a_{n-1}+\dots+b_{n-1}s_{\epsilon-1}a_{n-1}^{\epsilon-1}&-t_0-t_1a_{n-1}-\dots-t_{k-1+\epsilon}a_{n-1}^{k-1+\epsilon} = -b_{n-1}a_{n-1}
+\end{align*}
+We can then rewrite this system of $n$ unknowns in $n$ equations as a matrix problem $Uz=V$
+\[
+\left[\begin{array}{cccccc}
+    b_0a_0^0 & \cdots & b_0a_0^{\epsilon-1} &  -a_0^0 & \cdots & -a_0^{k-1+\epsilon}\\ \vdots \\
+    b_{n-1}a_{n-1}^0 & \cdots & b_{n-1}a_{n-1}^{\epsilon-1} &  -a_{n-1}^0 & \cdots & -a_{n-1}^{k-1+\epsilon}
+\end{array}
+\right] \left[\begin{array}{c}
+    s_0 \\ \vdots \\ s_{\epsilon-1}\\t_0 \\ \vdots \\ t_{k-1+\epsilon}
+\end{array}
+\right]=\left[\begin{array}{c}
+    -b_0a_-^\epsilon \\ \vdots \\ -b_{n-1}a_{n-1}^\epsilon
+\end{array}\right]
+\]
+where $U\in \mathbb{R}^{n\times n}$, $z\in \mathbb{R}^{n\times 1}$, and $V\in\mathbb{R}^{n\times1}$. Thus we can find all our coefficients for $E$ and $G$ by solving the straightforward system of equations above. Lastly, we can work recursively from our definitions to finish the algorithm.
+
+\begin{algorithm} Berlekamp-Welch decoding
+    \begin{enumerate}
+        \item $E,G \leftarrow$ Found as shown above
+        \item $f^* \leftarrow$ $\frac{G}{E}$
+        \item $m^* \leftarrow$ Coefficients of $f^*$
+        \item If $d(\Phi(m^*),b)>\epsilon$, return "Fail"
+        \item $m \leftarrow$ $m^*$
+    \end{enumerate}
+\end{algorithm}
+
+\end{document}

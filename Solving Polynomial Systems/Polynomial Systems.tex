@@ -1,0 +1,350 @@
+
+\documentclass{article}%
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{fullpage}
+\usepackage{graphicx}%
+\setcounter{MaxMatrixCols}{30}
+%TCIDATA{OutputFilter=latex2.dll}
+%TCIDATA{Version=5.50.0.2960}
+%TCIDATA{CSTFile=LaTeX article (bright).cst}
+%TCIDATA{LastRevised=Friday, December 01, 2023 23:06:52}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%BeginMSIPreambleData
+\providecommand{\U}[1]{\protect\rule{.1in}{.1in}}
+%EndMSIPreambleData
+\allowdisplaybreaks
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\begin{document}
+
+\title{Solving Polynomial Systems\\ Using Subresultants}
+\author{Grant McNaughton}
+\date{28 April 2024}
+
+\maketitle
+
+
+\noindent In this paper, we will develop mathematical theories and algorithms
+for the following problem.
+
+\begin{description}
+\item[Input:] $f\in\mathbb{C}\left[  x_{1},\ldots,x_{n}\right]  ^{n}$
+
+\item[Output:] $S=V(f) $, the set of all complex solutions of $f$.
+\end{description}
+
+\section{Theory}
+
+\begin{notation}
+Let%
+\begin{align*}
+f  &  =a_{p}x^{p}+\cdots+a_{0}x^{0}\\
+g  &  =b_{q}x^{q}+\cdots+b_{0}x^{0}%
+\end{align*}
+where $x$ is a variable and $a_{i}$ and $b_{i}$ are coefficients which might
+be again polynomials in other variables.
+\end{notation}
+
+\begin{definition}
+[Subresultant]The $k$-th subresultant of $f$ and $g$ with respect to $x$,
+written as $R_{x,k}\left(  f,g\right)  $, is defined by%
+\[
+\left|
+\begin{array}{ccccccccc}
+    a_p & a_{p-1} & \cdots& a_{\epsilon+1} & a_\epsilon & a_{\epsilon-1} &\cdots & a_{2k-q+2} & a_{2k-q+1}x^k+\dots+a_0x^{q-k-1}\\
+    0 & a_p & \cdots & a_{\epsilon+2} & a_{\epsilon+1} & a_\epsilon & \cdots & a_{2k-q+3}& a_{2k-q+2}x^k+\dots+a_0x^{q-k-2}\\
+    \vdots & \vdots & & \vdots & \vdots & \vdots & &\vdots & \vdots\\
+    0 & 0 & \cdots & a_{\delta+1} & a_\delta & a_{\delta-1}&\cdots&a_{2k+q+r+1} & \sum_{n=0}^{2k-q+r} a_nx^{n+q-k-r}\\
+    \vdots & \vdots & & \vdots & \vdots & \vdots & &\vdots & \vdots\\
+    0 & 0 & \cdots & a_p & a_{p-1} & a_{p-2} &\cdots &a_k& a_{k-1}x^k+\dots+a_0x^1\\
+    0 & 0 &\cdots & 0 & a_p & a_{p-1} & \cdots & a_{k+1} &  a_kx^k+\dots+a_0x^0\\
+    
+    b_q & b_{q-1} & \cdots & b_{\epsilon+1} & b_\epsilon & b_{\epsilon-1} & \cdots & b_{2k-p+2} & b_{2k-p+1}x^k+\cdots+b_0x^{p-k-1} \\
+    0 & b_q & \cdots & b_{\epsilon+2} & b_{\epsilon+1} & b_\epsilon & \cdots & b_{2k-p+3}& b_{2k-q+2}x^k+\cdots + b_0x^{p-k-2}\\
+    \vdots & \vdots & & \vdots & \vdots & \vdots & &\vdots & \vdots\\
+    0 & 0 & \cdots & b_{\delta+1} & b_\delta & b_{\delta-1} & \cdots & b_{3k-p-q+r+1} & \sum_{n=1}^{3k-p-q+r} b_nx^{n-2k+p+q-r}\\
+    \vdots & \vdots & & \vdots & \vdots & \vdots & &\vdots & \vdots\\
+    0 & 0 & \cdots & b_q & b_{q-1} & b_{q-2} &\cdots & b_k & b_{k-1}x^k +\cdots+ b_0x^1\\
+    0 & 0 & \cdots & 0 & b_q & b_{q-1} & \cdots & b_{k+1} & b_kx^k+\dots+b_0x^0
+\end{array}
+\right|
+\]
+where $r$ is given by the row number, starting at $1$ and ending at $q+p-2k$. The matrix defining the subresultant is in $\mathbb{R}^{q+p-2k \times q+p-2k}$.
+\end{definition}
+
+\begin{theorem}
+We have
+
+\begin{enumerate}
+\item $\deg_{x}R_{x,k}\leq k$
+
+\item $R_{x,k}\left(  f,g\right)  \in\left\langle f,g\right\rangle $.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+
+\begin{enumerate}
+\item Obvious from Laplace expansion along the last column.
+
+\item For the sake of simple presentation, we show the proof only for
+$p=3,\ q=4$ and $k=1$.
+
+\noindent Note that $f=a_3x^3+a_2x^2+a_1x+a_0$ and $g=b_4x^4+b_3x^3+b_2x^2+b_1x+b_0$ and that we can define $R_{x,1}(f,g)$ as
+\[
+\left|
+\begin{array}{ccccc}
+    a_3 & a_2 & a_1 & a_0 & 0 \\
+    0 & a_3 & a_2 & a_1 & a_0x \\
+    0 & 0 & a_3 & a_2 & a_1x+a_0 \\
+    b_4 & b_3 & b_2 & b_1 & b_0x \\
+    0 & b_4 & b_3 & b_2 & b_1x+b_0
+\end{array}
+\right|
+\]
+This matrix is $5\times5$ and we will define its columns as $c_1,c_2,c_3,c_4,$ and $c_5$ respectively. Using determinant rules, we can redefine $c_5$ as $c_5+c_4x^2+c_3x^3+c_2x^4+c_1x^5$ without changing the determinant of the matrix. Thus
+\[
+\left|
+\begin{array}{ccccc}
+    a_3 & a_2 & a_1 & a_0 & 0 \\
+    0 & a_3 & a_2 & a_1 & a_0x \\
+    0 & 0 & a_3 & a_2 & a_1x+a_0 \\
+    b_4 & b_3 & b_2 & b_1 & b_0x \\
+    0 & b_4 & b_3 & b_2 & b_1x+b_0
+\end{array}
+\right| = \left|
+\begin{array}{ccccc}
+    a_3 & a_2 & a_1 & a_0 & a_0x^2+a_1x^3+a_2x^4+a_3x^5 \\
+    0 & a_3 & a_2 & a_1 & a_0x+a_1x^2+a_2x^3+a_3x^4 \\
+    0 & 0 & a_3 & a_2 & a_0+a_1x+a_2x^2+a_3x^3 \\
+    b_4 & b_3 & b_2 & b_1 & b_0x+b_1x^2+b_2x^3+b_3x^4+b_4x^5 \\
+    0 & b_4 & b_3 & b_2 & b_0+b_1x+b_2x^2+b_3x^3+b_4x^4
+\end{array}
+\right|\]\[ = \left|
+\begin{array}{ccccc}
+    a_3 & a_2 & a_1 & a_0 & x^2f \\
+    0 & a_3 & a_2 & a_1 & xf \\
+    0 & 0 & a_3 & a_2 & f \\
+    b_4 & b_3 & b_2 & b_1 & xg \\
+    0 & b_4 & b_3 & b_2 & g
+\end{array}
+\right| = \left|
+\begin{array}{ccccc}
+    a_3 & a_2 & a_1 & a_0 & x^2f \\
+    0 & a_3 & a_2 & a_1 & xf \\
+    0 & 0 & a_3 & a_2 & f \\
+    b_4 & b_3 & b_2 & b_1 & 0 \\
+    0 & b_4 & b_3 & b_2 & 0
+\end{array}
+\right|+\left|
+\begin{array}{ccccc}
+    a_3 & a_2 & a_1 & a_0 & 0 \\
+    0 & a_3 & a_2 & a_1 & 0 \\
+    0 & 0 & a_3 & a_2 & 0 \\
+    b_4 & b_3 & b_2 & b_1 & xg \\
+    0 & b_4 & b_3 & b_2 & g
+\end{array}
+\right|
+\]
+We can then use determinant rules to factor out $f$ and $g$ from $c_5$, giving
+\[
+\left|
+\begin{array}{ccccc}
+    a_3 & a_2 & a_1 & a_0 & x^2 \\
+    0 & a_3 & a_2 & a_1 & x \\
+    0 & 0 & a_3 & a_2 & 1 \\
+    b_4 & b_3 & b_2 & b_1 & 0 \\
+    0 & b_4 & b_3 & b_2 & 0
+\end{array}
+\right|f+\left|
+\begin{array}{ccccc}
+    a_3 & a_2 & a_1 & a_0 & 0 \\
+    0 & a_3 & a_2 & a_1 & 0 \\
+    0 & 0 & a_3 & a_2 & 0 \\
+    b_4 & b_3 & b_2 & b_1 & x \\
+    0 & b_4 & b_3 & b_2 & 1
+\end{array}
+\right|g
+\]
+If we set $U(x)=\left|
+\begin{array}{ccccc}
+    a_3 & a_2 & a_1 & a_0 & x^2 \\
+    0 & a_3 & a_2 & a_1 & x \\
+    0 & 0 & a_3 & a_2 & 1 \\
+    b_4 & b_3 & b_2 & b_1 & 0 \\
+    0 & b_4 & b_3 & b_2 & 0
+\end{array}
+\right|$ and $V(x)=\left|
+\begin{array}{ccccc}
+    a_3 & a_2 & a_1 & a_0 & 0 \\
+    0 & a_3 & a_2 & a_1 & 0 \\
+    0 & 0 & a_3 & a_2 & 0 \\
+    b_4 & b_3 & b_2 & b_1 & x \\
+    0 & b_4 & b_3 & b_2 & 1
+\end{array}
+\right|$, then we can say that $R_{x,1}(f,g)=U(x)f+V(x)g$, thus $R_{x,1}(f,g)\in\left<f,g\right>$
+
+\end{enumerate}
+
+\end{proof}
+
+\begin{definition}
+[Triangularization]Let%
+\[
+f=\left(  f_{1},\ldots,f_{n}\right)  \in\mathbb{C}\left[  x_{1},\ldots
+,x_{n}\right]  ^{n}\text{.}%
+\]
+Then the \emph{trianglarization }of $f$, denoted as
+\[
+\tilde{f}=\left(  \tilde{f}_{1},\ldots,\tilde{f}_{n}\right)  \in
+\mathbb{C}\left[  x_{1},\ldots,x_{n}\right]  ^{n}%
+\]
+is defined by the following process. \newline
+
+\noindent(For the sake of simple presentation, we will show the $n=4$ case
+only. The generalization to arbitrary $n$ is straightforward).
+
+\begin{enumerate}
+\item Repeated $0$-th order subresultant (resultant):%
+\[%
+\begin{array}
+[c]{llll}%
+f_{1}\ \ \  &  &  & \\
+f_{2} & f_{12}=R_{x_{1},0}\left(  f_{1},f_{2}\right)  \ \ \  &  & \\
+f_{3} & f_{13}=R_{x_{1},0}\left(  f_{1},f_{3}\right)  & f_{123}=R_{x_{2}%
+,0}\left(  f_{12},f_{13}\right)  \ \ \  & \\
+f_{4} & f_{14}=R_{x_{1},0}\left(  f_{1},f_{4}\right)  & f_{124}=R_{x_{2}%
+,0}\left(  f_{12},f_{14}\right)  & f_{1234}=R_{x_{3},0}\left(  f_{123}%
+,f_{124}\right)
+\end{array}
+\]
+
+
+\item $1$-st order subresultant:%
+\begin{align*}
+\tilde{f}_{1}  &  =R_{x_{1},1}\left(  f_{1},f_{2}\right) \\
+\tilde{f}_{2}  &  =R_{x_{2},1}\left(  f_{12},f_{13}\right) \\
+\tilde{f}_{3}  &  =R_{x_{3},1}\left(  f_{123},f_{124}\right) \\
+\tilde{f}_{4}  &  =f_{1234}%
+\end{align*}
+
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}
+$V(\tilde{f})\supseteq V(f)$
+\end{theorem}
+
+\begin{proof}
+For the sake of simple presentation, we show the proof only for $n=4$. We will first show that $\tilde{f}_1,\tilde{f}_2,\tilde{f}_3,\tilde{f}_4\in \left<f_1,f_2,f_3,f_4\right>$, then we will use that to show that for any $\alpha\in V(f)$, $\alpha\in V(\tilde{f})$ as well.
+
+Note the following:
+\begin{align*}
+    \tilde{f}_1&=R_{x_1,1}(f_1,f_2)\in \left< f_1,f_2\right>\subset \left< f_1, f_2, f_3, f_4 \right>\\
+    \\
+    \tilde{f}_{2}  &  =R_{x_{2},1}\left(  f_{12},f_{13}\right) \in \left<f_{12},f_{13}\right>=\left<   R_{x_1,0}\left(f_1,f_2\right),R_{x_1,0}\left(f_1,f_3\right) \right> \\
+    &\subset \left<\left<f_1,f_2\right>,\left<f_1,f_3\right>\right>\subset \left<f_1,f_2,f_3\right>\subset\left<f_1,f_2,f_3,f_4\right>\\
+    \\
+    \tilde{f}_{3}  &  =R_{x_{3},1}\left(  f_{123},f_{124}\right) \in \left<f_{123},f_{123}\right>=\left<R_{x_2,0}(f_{12},f_{13}),R_{x_2,0}(f_{12},f_{14})\right>\\
+    &\subset\left<\left<f_{12},f_{13}\right>,\left<f_{12},f_{14}\right>\right> \subset \left<f_{12},f_{13},f_{14}\right> = \left<R_{x_1,0}(f_1,f_2),R_{x_1,0}(f_1,f_3),R_{x_1,0}(f_1,f_4)\right>\\
+    &\subset \left<\left<f_1,f_2\right>,\left<f_1,f_3\right>,\left<f_1,f_4\right>\right> \subset \left<f_1,f_2,f_3,f_4\right>\\
+    \\
+\tilde{f}_{4}  &  =R_{x_3,0}\left(f_{123},f_{124}\right) \in \left<f_{123},f_{124}\right> \subset \left<f_1,f_2,f_3,f_4\right>
+\end{align*}
+Thus $\tilde{f}\in\left< f \right>$. Because of this, we can define $\tilde{f}$ as follows:
+\begin{align*}
+\tilde{f}_1&=u_{11}f_1+u_{12}f_2+u_{13}f_3+u_{14}f_4\\
+\tilde{f}_2&=u_{21}f_1+u_{22}f_2+u_{23}f_3+u_{24}f_4\\
+\tilde{f}_3&=u_{31}f_1+u_{32}f_2+u_{33}f_3+u_{34}f_4\\
+\tilde{f}_4&=u_{41}f_1+u_{42}f_2+u_{43}f_3+u_{44}f_4
+\end{align*}
+for some set of $u$'s in $\mathbb{R}$. Let $\alpha$ solve $f$, that is $f_1(\alpha)=f_2(\alpha)=f_3(\alpha)=f_4(\alpha)=0$. From this, we can say that $\tilde{f}_1(\alpha)=u_{11}\cdot 0 + u_{12}\cdot 0 + u_{13}\cdot 0 + u_{14}\cdot 0 = 0$, which is similarly true for $\tilde{f}_2$, $\tilde{f}_3$, and $\tilde{f}_4$. Because $\tilde{f}_1(\alpha)=\tilde{f}_2(\alpha)=\tilde{f}_3(\alpha)=\tilde{f}_4(\alpha)=0$, we know that $\alpha\in V(\tilde{f})$. Therefore it must be true that $V(f)\subseteq F(\tilde{f})$.
+\end{proof}
+
+\section{Algorithms}
+
+\begin{algorithm}
+[Triangularize]
+\phantom{L}
+\begin{enumerate}
+    \item $h$ $\leftarrow$ $f$
+    \item $\tilde{f}$ $\leftarrow$ $0_{n\times 1}$
+    \item For $i=0,\dots,n-1$
+
+    $\tilde{f}_i$ $\leftarrow$ $R_{x_i,1}(h_i,h_{i+1})$
+    
+    \hspace{25}where for $j=i+1,\dots,n-1$
+    
+    \hspace{25}$h_j$ $\leftarrow$ $R_{x_i,0}(h_i,h_j)$
+    \item $\tilde{f}_n$ $\leftarrow$ $h_{n-1}$
+\end{enumerate}
+\end{algorithm}
+
+\begin{algorithm}
+[BackSubstitute]
+\phantom{L}
+\begin{enumerate}
+    \item $rs$ $\leftarrow$ All complex roots of $\tilde{f}_{n-1}$
+    \item $T$ $\leftarrow$ $[\phantom{0}]$, an empty list
+    \item For a root $r$ in $rs$,
+
+    $t$ $\leftarrow$ $0_{n\times1}$
+
+    $t_{n-1}$ $\leftarrow$ $r$
+
+    \hspace{25pt}where for $i=n-2,n-1,\dots,1,0$
+
+    \hspace{50pt}where for $j=i+1,\dots,n-1$
+
+    \hspace{50pt}$h$ $\leftarrow$ $\tilde{f}_i(t_j)$
+
+    \hspace{25pt}$t_i$ $\leftarrow$ $-\frac{\text{coeff}(h,x_i,0)}{\text{coeff}(h,x_i,1)}$, where the coefficients are evaluated on $h$ at $x_i^0$ and $x_i^1$
+
+    \hspace{25pt}Append $t$ to $T$
+
+    \item $T$ $\leftarrow$ All possible complex solutions to $\tilde{f}$
+\end{enumerate}
+\end{algorithm}
+
+\begin{algorithm}
+[ChooseSolution]
+\phantom{L}
+\begin{enumerate}
+    \item $S$ $\leftarrow$ $[\phantom{0}]$, an empty list
+
+    \item For a solution $t$ in $T$,
+
+    $h$ $\leftarrow$ $f(t)$
+
+    and if $||h||_2\leq\epsilon$, append $h$ to $S$
+
+    \item $S$ $\leftarrow$ All possible complex solutions to $f$
+\end{enumerate}
+\end{algorithm}
+
+
+\end{document}
