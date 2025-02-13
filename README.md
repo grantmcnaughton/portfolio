@@ -1,1 +1,2 @@
-# portfolio
+# Welcome to my portfolio!
+This folder contains a few projects I have previously worked on. The folder "Classification and Regression Trees - Full Paper" includes a full paper detailing the history and algorithm behind CART as a regression method. The other folders contain explorations of different applications of mathematics to various fields, primarily using algebra and calculus. Please feel free to look around a bit and enjoy your time here!
