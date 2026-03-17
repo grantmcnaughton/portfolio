@@ -4,4 +4,4 @@ Using ArcGIS and data from the US Census American Community Survey, this geospat
  
 This project utilizes public raster and vector datasets, reflecting my ability to independently scope and execute a data-driven study, interpret spatial relationships in a real-world policy context, and communicate technical findings clearly, including an honest assessment of the analysis's limitations and the factors a more comprehensive study would need to address.
 
-[Read the paper](https://github.com/grantmcnaughton/portfolio/blob/main/Classification%20and%20Regression%20Trees/Classification_and_Regression_Trees.pdf)
+[Read the paper]([https://github.com/grantmcnaughton/portfolio/blob/main/Transit%20Gap%20Analysis/Transit%20Gap%20Analysis.pdf])
